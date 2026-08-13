@@ -24,6 +24,12 @@ let package = Package(
             targets: ["X509"]
         )
     ],
+    traits: [
+        .trait(
+            name: "MLDSA",
+            description: "Enable ML-DSA (FIPS 204) certificate support. Requires swift-crypto 4.0.0 or later."
+        )
+    ],
     targets: [
         .target(
             name: "X509",
@@ -35,6 +41,9 @@ let package = Package(
             ],
             exclude: [
                 "CMakeLists.txt"
+            ],
+            swiftSettings: [
+                .define("SWIFT_CERTIFICATES_MLDSA", .when(traits: ["MLDSA"]))
             ]
         ),
         .testTarget(
@@ -53,6 +62,9 @@ let package = Package(
                 .copy("PEMTestRSACertificate.pem"),
                 .copy("CSR Vectors/"),
                 .copy("ca-certificates.crt"),
+            ],
+            swiftSettings: [
+                .define("SWIFT_CERTIFICATES_MLDSA", .when(traits: ["MLDSA"]))
             ]
         ),
         .target(
@@ -82,12 +94,12 @@ if ProcessInfo.processInfo.environment["SWIFTCI_USE_LOCAL_DEPS"] == nil {
     // that have a direct dependency on swift-crypto accept beta releases as well.
     if ProcessInfo.processInfo.environment["SWIFT_CERTIFICATES_ALLOW_SWIFT_CRYPTO_BETA"] == nil {
         package.dependencies += [
-            .package(url: "https://github.com/apple/swift-crypto.git", "4.0.0"..<"5.0.0")
+            .package(url: "https://github.com/apple/swift-crypto.git", "3.12.3"..<"5.0.0")
         ]
     } else {
         print("Accepting beta versions of swift-crypto!")
         package.dependencies += [
-            .package(url: "https://github.com/apple/swift-crypto.git", "4.0.0"..<"5.0.0-beta.max")
+            .package(url: "https://github.com/apple/swift-crypto.git", "3.12.3"..<"5.0.0-beta.max")
         ]
     }
 
